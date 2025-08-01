@@ -121,14 +121,16 @@
         }
         #pdf-modal-overlay .modal-close {
             color: white;
-            background-color: rgba(0,0,0,0.5);
+            background-color: rgba(0,0,0,0.7);
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            line-height: 40px;
-            top: 10px;
-            right: 10px;
-            font-size: 1.5em;
+            width: 36px;
+            height: 36px;
+            line-height: 36px;
+            text-align: center;
+            padding: 0;
+            top: -18px;
+            right: -18px;
+            font-size: 1.4em;
         }
         #modal-body .site-name {
             font-size: 2em;
@@ -209,7 +211,7 @@
             width: 90%;
             height: 90%;
             padding: 0;
-            overflow: hidden;
+            overflow: visible; /* FIX: Allow close button to be visible outside */
         }
         #pdf-viewer {
             width: 100%;
