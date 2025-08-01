@@ -115,6 +115,7 @@
             font-size: 2em;
             cursor: pointer;
             color: #888;
+            z-index: 10;
         }
         #modal-body .site-name {
             font-size: 2em;
@@ -135,23 +136,6 @@
             border-radius: 8px;
             margin: 0 auto 20px;
             display: block;
-        }
-        #modal-body .pdf-link-container {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        #modal-body .pdf-link {
-            display: inline-block;
-            background-color: #e63946;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: bold;
-            transition: background-color 0.2s;
-        }
-        #modal-body .pdf-link:hover {
-            background-color: #d62828;
         }
         #modal-body .details {
             display: grid;
@@ -174,8 +158,14 @@
         }
         .modal-buttons {
             display: flex;
+            justify-content: space-between;
+            align-items: center;
             gap: 10px;
             margin-top: 30px;
+        }
+        .modal-buttons-group {
+            display: flex;
+            gap: 10px;
         }
         .modal-buttons button {
             background: #f8f9fa;
@@ -192,11 +182,15 @@
             color: white;
             border: none;
         }
-        .modal-buttons button.link-btn {
-            background-color: #007bff;
+        .modal-buttons button.link-btn, .modal-buttons button.pdf-btn {
             color: white;
             border: none;
-            margin-right: auto;
+        }
+        .modal-buttons button.link-btn {
+            background-color: #007bff;
+        }
+        .modal-buttons button.pdf-btn {
+            background-color: #e63946;
         }
         .modal-buttons button:hover {
             background-color: #e9ecef;
@@ -206,6 +200,97 @@
         }
         .modal-buttons button.link-btn:hover {
             background-color: #0056b3;
+        }
+        .modal-buttons button.pdf-btn:hover {
+            background-color: #c9302c;
+        }
+        #pdf-modal-content {
+            width: 90%;
+            height: 90%;
+            padding: 0;
+            overflow: hidden;
+        }
+        #pdf-viewer {
+            width: 100%;
+            height: 100%;
+        }
+        #pdf-viewer iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        #add-site-section {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            width: 80%;
+            max-width: 1200px;
+            margin-top: 40px;
+        }
+        #add-site-section h2 {
+            font-family: 'Cafe24PROUP', sans-serif;
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 25px;
+        }
+        #add-site-form .form-group {
+            margin-bottom: 15px;
+        }
+        #add-site-form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        #add-site-form input[type="text"],
+        #add-site-form textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-family: 'NanumSquareRound', sans-serif;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+        #add-site-form textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        #add-site-form button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-family: 'NanumSquareRound', sans-serif;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #add-site-form button:hover {
+            background-color: #0056b3;
+        }
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.75);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.5s, bottom 0.5s;
+            visibility: hidden;
+            font-size: 1.1em;
+        }
+        .notification.show {
+            opacity: 1;
+            bottom: 40px;
+            visibility: visible;
         }
         @media (max-width: 1200px) {
             #site-list-container {
@@ -224,7 +309,7 @@
             .main-title {
                 font-size: 2.5em;
             }
-            #site-list-container {
+            #site-list-container, #add-site-section {
                 width: 95%;
             }
             #modal-body .details {
@@ -242,29 +327,80 @@
             <div id="modal-body"></div>
         </div>
     </div>
+    <!-- PDF 뷰어 모달 추가 -->
+    <div id="pdf-modal-overlay" class="modal-overlay">
+        <div id="pdf-modal-content" class="modal-content">
+            <button id="pdf-modal-close" class="modal-close">&times;</button>
+            <div id="pdf-viewer"></div>
+        </div>
+    </div>
+    <section id="add-site-section">
+        <h2>새로운 정보 추가/수정</h2>
+        <form id="add-site-form">
+            <input type="hidden" id="edit-index" value="-1">
+            <div class="form-group">
+                <label for="site-name">이름</label>
+                <input type="text" id="site-name" placeholder="예: 🔗 워크북 MAKER" required>
+            </div>
+            <div class="form-group">
+                <label for="site-link">링크</label>
+                <input type="text" id="site-link" placeholder="예: https://example.com">
+            </div>
+            <div class="form-group">
+                <label for="site-image">이미지 URL</label>
+                <input type="text" id="site-image" placeholder="예: https://example.com/image.png">
+            </div>
+            <div class="form-group">
+                <label for="site-pdf">PDF 링크 (구글 드라이브 공유)</label>
+                <input type="text" id="site-pdf" placeholder="구글 드라이브 '링크가 있는 모든 사용자' 공유 링크">
+            </div>
+            <div class="form-group">
+                <label for="site-description">설명</label>
+                <textarea id="site-description" placeholder="사이트에 대한 설명을 입력하세요."></textarea>
+            </div>
+            <div class="form-group">
+                <label for="site-usage">사용법</label>
+                <textarea id="site-usage" placeholder="사용법을 입력하세요."></textarea>
+            </div>
+            <button type="submit">저장하기</button>
+        </form>
+    </section>
+    <div id="save-notification" class="notification">저장되었습니다!</div>
     <script>
         const siteListContainer = document.getElementById('site-list-container');
         const modalOverlay = document.getElementById('modal-overlay');
         const modalBody = document.getElementById('modal-body');
         const modalClose = document.getElementById('modal-close');
+        const pdfModalOverlay = document.getElementById('pdf-modal-overlay');
+        const pdfViewer = document.getElementById('pdf-viewer');
+        const pdfModalClose = document.getElementById('pdf-modal-close');
+        const form = document.getElementById('add-site-form');
+        const editIndexInput = document.getElementById('edit-index');
+        const siteNameInput = document.getElementById('site-name');
+        const siteLinkInput = document.getElementById('site-link');
+        const siteImageInput = document.getElementById('site-image');
+        const sitePdfInput = document.getElementById('site-pdf');
+        const siteDescriptionInput = document.getElementById('site-description');
+        const siteUsageInput = document.getElementById('site-usage');
+        const saveNotification = document.getElementById('save-notification');
 
         const initialData = [
-            { name: '🛠️ 워크북 MAKER🛠️', link: 'https://youzinnnnn.github.io/adot/', image: '', pdfData: null, pdfName: null, description: '자료제작 TOOL\n지문 → 넘버링 문장 제작 + 한줄 순서 배열 제작 + 어순배열', usage: '💡 자세한 건 사이트 내 사용법이 존재합니다!' },
-                { name: '✨단어 테스트✨', link: 'https://adotsongtan-wordtests-simple.netlify.app/', image: '', pdfData: null, pdfName: null, description: '단어 테스트 생성기\n단어 테스트 PPT 제작(기존 TOOL) 대신 활용할 수 있는 사이트', usage: '💡 사용 방법은 사이트 내 사용법이 존재합니다!\n시트에 단어 입력\n1. 단어장 제작한 엑셀 파일에서 번호 & 단어 & 단어 뜻을 모두 복사\n2. 범위 / 단어 / 의미 아래에 붙여넣기\n3. 복붙한 단어 옆 열에 학교학년, 출처를 작성 후 끝까지 복붙해야 함' },
-                { name: '📚 단어 easy📚', link: 'https://adotsongtan-wordeasy.netlify.app/', image: '', pdfData: null, pdfName: null, description: '단어 easy\n모의고사 & 부교재 단어와 같이 고단끝이 없는 경우 활용할 수 있는 단어테스트', usage: '1. 조교 혹은 쌤이 시트에 단어 입력\n2. 시트에는 학교학년(태광고2) 출처(모의고사) 번호(21번) 단어 단어뜻 순서로 입력\n3. 학생이 학교학년을 입력한 뒤 내 단어장 불러오기\n————————————\n💡 그 외는 도움말 보기에 있습니다.' },
-                { name: '🎓 실시간 로드맵 생성기', link: 'https://adotsongtan-roadmap.netlify.app/', image: '', pdfData: null, pdfName: null, description: '로드맵 생성기\n학생 이름을 검색하면 공유 가능한 로드맵 이미지와 멘트 수정 되며 복붙 가능', usage: '1. 조교 혹은 쌤이 시트에 숙제 입력\n2. 학생 이름 입력 후 로드맵 생성\n‼️이름 일부 입력 & 엔터로 검색 가능하게 수정했습니다‼️\n3. 이미지 복사 & 멘트 복사\n—————————————\n🔥 보내기 전에 한 번 더 새로고침해주세요!!🔥\n🔥 입력한 셀을 계속 클릭하고 있을 시 적용이 안됩니다!🔥\n🔥멘트는 변경이 가능하나 변경된 걸로 계속 유지되진 않습니다 🔥' },
-                { name: '🧩영어2 능률 김성곤 어순배열 연습🧩', link: 'https://adotsongtan-arrangementpractice.netlify.app/', image: '', pdfData: null, pdfName: null, description: '어순배열 연습용\n영어2 능률 김성곤 1과, 2과, 1-2과 영작 포인트 무한대로 연습 가능! (학생 전달용)', usage: '@활용법(더블클릭해서 보세영)\n\n해당 활용법에 대해서는 사진으로 정리해두었습니다!' },
-                { name: '🔀영어2 능률 김성곤 1-2과 어순배열 테스트🔀', link: 'https://adotsongtan-arrangementtest.netlify.app/', image: '', pdfData: null, pdfName: null, description: '어순배열 테스트용\n영어2 능률 김성곤 1-2과 10문제 랜덤(구두테스트용)', usage: '@활용법(더블클릭해서 보세영)\n\n해당 활용법에 대해서는 사진으로 정리해두었습니다!' },
-                { name: '✨ 영어 문장 형식 테스트 생성기✨', link: 'https://adotsongtan-formattest.netlify.app/', image: '', pdfData: null, pdfName: null, description: '1-5형식 테스트지 제작\n형식 설정 & 문제 개수 설정 가능\npdf 저장 가능', usage: '1. 형식 범위를 설정\n• 1형식, 3형식 ☞ 1,3 / 1형식에서 5형식 ☞ 1-5\n2. 문장 개수를 설정\n• 각 형식별로 500개까지 가능\n3. 테스트 생성 후 스크롤을 밑으로 내리면 “PDF로 저장” 버튼 클릭\n\n💡 문제에서 구조분석도 시키지만 답지에는 구조분석이 나오지 않습니다 ㅠ' },
-                { name: '✍️ 구문 배열 테스트✍️', link: 'https://adotsongtan-phrasearrangement.netlify.app/', image: '', pdfData: null, pdfName: null, description: '구배열 테스트\n송탄고2처럼 어순이 아닌 구를 배열할 때 사용할 수 있는 구배열 연습 사이트', usage: '1. 영어 본문, 한국어 번역 입력\n• 내신에인젤 지문 양식과 동일\n2. 테스트 생성하기\n• 문제 생성됨\n♧ 저희 학생이 첨보는 지문으로 하는 거여서 문장부호, 대문자 그대로 두었습니다!♧\n3. 본문 저장\n• 저장할 제목 입력 후 현재 본문 저장 ☞ 저장된 목록에 저장됨\n\n💡여기서 저장된 목록은 브라우저별로 저장되어 모두가 똑같이 저장되는 것이 아닙니다!' },
-                { name: '🔥영어 어법 문제 생성기🔥', link: 'https://adotsongtan-grammartest.netlify.app/', image: '', pdfData: null, pdfName: null, description: '어법 문제 생성기\n지문을 넣으면 어법 문제 제작되며 문제 수정, 답지 수정, TXT 저장 가능', usage: '💡 자세한 건 사이트 내 사용법이 존재합니다!\n\n🔥 문제가 완벽하지는 않습니다!!🔥\n지문을 분석하고 문제를 생성하는 게 아닌 규칙에 따라 생성하는 것이기 때문에 오류가 있을 수 있으니 검토 후에 저장해주시거나 참고용으로 사용해주세요!\n———\n🔎 기능 1 : 문제 수정 가능\n• 문제 추가 가능 : [ ]에 인식하기 때문에 문제 추가시 [단어1 / 단어2] 형식으로 추가해주세요.\n• 문제 삭제 기능 : [ ]에 인식하기 때문에 [ ] 를 삭제해주시면 삭제됩니다.\n🔎 기능 2 : 답지 편집 가능\n• 문제 추가시 : 새로 추가한 문제 순서에 맞춰서 답지가 생성됩니다. 답과 해설은 직접 추가해주셔야 합니다!\n• 문제 삭제시 : 문제 삭제되면 알아서 답이 사라집니다!\n🔎 기능 3 : TXT 저장 가능\n• TXT로 저장 버튼을 누르면 한 텍스트 파일로 정리되어 다운로드 됩니다!' },
-                { name: '📚 영영풀이 퀴즈 📚', link: 'https://adotsongtan-eng-eng-test.netlify.app/', image: '', pdfData: null, pdfName: null, description: '영영풀이 연습\n해당 학교, 학년, 과를 설정하면 영영풀이 테스트 가능', usage: '1. 조교 혹은 쌤이 시트에 단어 입력\n2. 시트에는 학교 학년 범위 단어 단어뜻 영영풀이 영영풀이 뜻 순서로 입력\n3. 퀴즈 설정 후 시작 버튼 누르기\n♧기본으로 10개의 문제가 나옵니다!♧\n4. 퀴즈 결과\n————————————\n💡 그 외는 도움말 보기에 있습니다.' },
-            ];
+            { name: '🛠️ 워크북 MAKER🛠️', link: 'https://youzinnnnn.github.io/adot/', image: '', pdfUrl: '', description: '자료제작 TOOL\n지문 → 넘버링 문장 제작 + 한줄 순서 배열 제작 + 어순배열', usage: '💡 자세한 건 사이트 내 사용법이 존재합니다!' },
+            { name: '✨단어 테스트✨', link: 'https://adotsongtan-wordtests-simple.netlify.app/', image: '', pdfUrl: 'https://drive.google.com/file/d/1jAK90IRosQ7B8c4SUwhsNHJ9Naf4rUgr/view?usp=sharing', description: '단어 테스트 생성기\n단어 테스트 PPT 제작(기존 TOOL) 대신 활용할 수 있는 사이트', usage: '💡 사용 방법은 사이트 내 사용법이 존재합니다!\n시트에 단어 입력\n1. 단어장 제작한 엑셀 파일에서 번호 & 단어 & 단어 뜻을 모두 복사\n2. 범위 / 단어 / 의미 아래에 붙여넣기\n3. 복붙한 단어 옆 열에 학교학년, 출처를 작성 후 끝까지 복붙해야 함' },
+            { name: '📚 단어 easy📚', link: 'https://adotsongtan-wordeasy.netlify.app/', image: '', pdfUrl: 'https://drive.google.com/file/d/101LESey0k7CntkHGMa7LHi2_Jb9z3ZU4/view?usp=sharing', description: '단어 easy\n모의고사 & 부교재 단어와 같이 고단끝이 없는 경우 활용할 수 있는 단어테스트', usage: '1. 조교 혹은 쌤이 시트에 단어 입력\n2. 시트에는 학교학년(태광고2) 출처(모의고사) 번호(21번) 단어 단어뜻 순서로 입력\n3. 학생이 학교학년을 입력한 뒤 내 단어장 불러오기\n————————————\n💡 그 외는 도움말 보기에 있습니다.' },
+            { name: '🎓 실시간 로드맵 생성기', link: 'https://adotsongtan-roadmap.netlify.app/', image: '', pdfUrl: '', description: '로드맵 생성기\n학생 이름을 검색하면 공유 가능한 로드맵 이미지와 멘트 수정 되며 복붙 가능', usage: '1. 조교 혹은 쌤이 시트에 숙제 입력\n2. 학생 이름 입력 후 로드맵 생성\n‼️이름 일부 입력 & 엔터로 검색 가능하게 수정했습니다‼️\n3. 이미지 복사 & 멘트 복사\n—————————————\n🔥 보내기 전에 한 번 더 새로고침해주세요!!🔥\n🔥 입력한 셀을 계속 클릭하고 있을 시 적용이 안됩니다!🔥\n🔥멘트는 변경이 가능하나 변경된 걸로 계속 유지되진 않습니다 🔥' },
+            { name: '🧩영어2 능률 김성곤 어순배열 연습🧩', link: 'https://adotsongtan-arrangementpractice.netlify.app/', image: '', pdfUrl: '', description: '어순배열 연습용\n영어2 능률 김성곤 1과, 2과, 1-2과 영작 포인트 무한대로 연습 가능! (학생 전달용)', usage: '@활용법(더블클릭해서 보세영)\n\n해당 활용법에 대해서는 사진으로 정리해두었습니다!' },
+            { name: '🔀영어2 능률 김성곤 1-2과 어순배열 테스트🔀', link: 'https://adotsongtan-arrangementtest.netlify.app/', image: '', pdfUrl: '', description: '어순배열 테스트용\n영어2 능률 김성곤 1-2과 10문제 랜덤(구두테스트용)', usage: '@활용법(더블클릭해서 보세영)\n\n해당 활용법에 대해서는 사진으로 정리해두었습니다!' },
+            { name: '✨ 영어 문장 형식 테스트 생성기✨', link: 'https://adotsongtan-formattest.netlify.app/', image: '', pdfUrl: '', description: '1-5형식 테스트지 제작\n형식 설정 & 문제 개수 설정 가능\npdf 저장 가능', usage: '1. 형식 범위를 설정\n• 1형식, 3형식 ☞ 1,3 / 1형식에서 5형식 ☞ 1-5\n2. 문장 개수를 설정\n• 각 형식별로 500개까지 가능\n3. 테스트 생성 후 스크롤을 밑으로 내리면 “PDF로 저장” 버튼 클릭\n\n💡 문제에서 구조분석도 시키지만 답지에는 구조분석이 나오지 않습니다 ㅠ' },
+            { name: '✍️ 구문 배열 테스트✍️', link: 'https://adotsongtan-phrasearrangement.netlify.app/', image: '', pdfUrl: '', description: '구배열 테스트\n송탄고2처럼 어순이 아닌 구를 배열할 때 사용할 수 있는 구배열 연습 사이트', usage: '1. 영어 본문, 한국어 번역 입력\n• 내신에인젤 지문 양식과 동일\n2. 테스트 생성하기\n• 문제 생성됨\n♧ 저희 학생이 첨보는 지문으로 하는 거여서 문장부호, 대문자 그대로 두었습니다!♧\n3. 본문 저장\n• 저장할 제목 입력 후 현재 본문 저장 ☞ 저장된 목록에 저장됨\n\n💡여기서 저장된 목록은 브라우저별로 저장되어 모두가 똑같이 저장되는 것이 아닙니다!' },
+            { name: '🔥영어 어법 문제 생성기🔥', link: 'https://adotsongtan-grammartest.netlify.app/', image: '', pdfUrl: '', description: '어법 문제 생성기\n지문을 넣으면 어법 문제 제작되며 문제 수정, 답지 수정, TXT 저장 가능', usage: '💡 자세한 건 사이트 내 사용법이 존재합니다!\n\n🔥 문제가 완벽하지는 않습니다!!🔥\n지문을 분석하고 문제를 생성하는 게 아닌 규칙에 따라 생성하는 것이기 때문에 오류가 있을 수 있으니 검토 후에 저장해주시거나 참고용으로 사용해주세요!\n———\n🔎 기능 1 : 문제 수정 가능\n• 문제 추가 가능 : [ ]에 인식하기 때문에 문제 추가시 [단어1 / 단어2] 형식으로 추가해주세요.\n• 문제 삭제 기능 : [ ]에 인식하기 때문에 [ ] 를 삭제해주시면 삭제됩니다.\n🔎 기능 2 : 답지 편집 가능\n• 문제 추가시 : 새로 추가한 문제 순서에 맞춰서 답지가 생성됩니다. 답과 해설은 직접 추가해주셔야 합니다!\n• 문제 삭제시 : 문제 삭제되면 알아서 답이 사라집니다!\n🔎 기능 3 : TXT 저장 가능\n• TXT로 저장 버튼을 누르면 한 텍스트 파일로 정리되어 다운로드 됩니다!' },
+            { name: '📚 영영풀이 퀴즈 📚', link: 'https://adotsongtan-eng-eng-test.netlify.app/', image: '', pdfUrl: '', description: '영영풀이 연습\n해당 학교, 학년, 과를 설정하면 영영풀이 테스트 가능', usage: '1. 조교 혹은 쌤이 시트에 단어 입력\n2. 시트에는 학교 학년 범위 단어 단어뜻 영영풀이 영영풀이 뜻 순서로 입력\n3. 퀴즈 설정 후 시작 버튼 누르기\n♧기본으로 10개의 문제가 나옵니다!♧\n4. 퀴즈 결과\n————————————\n💡 그 외는 도움말 보기에 있습니다.' },
+        ];
 
-        let sites = JSON.parse(localStorage.getItem('sites')) || initialData;
+        let sites = JSON.parse(localStorage.getItem('songtan-it-room-data')) || initialData;
 
         const saveSites = () => {
-            localStorage.setItem('sites', JSON.stringify(sites));
+            localStorage.setItem('songtan-it-room-data', JSON.stringify(sites));
         };
 
         const renderSites = () => {
@@ -279,18 +415,23 @@
             });
         };
 
+        const convertToEmbedUrl = (url) => {
+            if (!url || !url.includes('drive.google.com')) return null;
+            return url.replace('/view?usp=sharing', '/preview').replace('/view', '/preview');
+        };
+
         const openModal = (index) => {
             const site = sites[index];
             const link = site.link && site.link.trim() !== '' ? site.link : '';
             const imageTag = site.image ? `<img src="${site.image}" alt="${site.name} 이미지" class="site-image">` : '';
-            const pdfTag = site.pdfData ? `<div class="pdf-link-container"><a href="${site.pdfData}" download="${site.pdfName}" class="pdf-link">PDF 파일 보기/다운로드</a></div>` : '';
+            const embedPdfUrl = convertToEmbedUrl(site.pdfUrl);
             const linkButtonTag = link ? `<button class="link-btn" onclick="window.open('${link}', '_blank')">🔗 링크로 이동</button>` : '';
+            const pdfButtonTag = embedPdfUrl ? `<button class="pdf-btn" data-pdf-url="${embedPdfUrl}">📄 PDF 보기</button>` : '';
 
             modalBody.innerHTML = `
                 <div class="site-name">${site.name}</div>
                 ${imageTag}
-                ${pdfTag}
-                <div class="details" style="display: grid;">
+                <div class="details">
                     <div class="description">
                         <div class="section-title">설명</div>
                         <div class="description-content">${site.description}</div>
@@ -301,9 +442,14 @@
                     </div>
                 </div>
                 <div class="modal-buttons">
-                    ${linkButtonTag}
-                    <button class="edit-btn" data-index="${index}">수정</button>
-                    <button class="delete-btn" data-index="${index}">삭제</button>
+                    <div class="modal-buttons-group">
+                        ${linkButtonTag}
+                        ${pdfButtonTag}
+                    </div>
+                    <div class="modal-buttons-group">
+                        <button class="edit-btn" data-index="${index}">수정</button>
+                        <button class="delete-btn" data-index="${index}">삭제</button>
+                    </div>
                 </div>
             `;
             modalOverlay.classList.add('visible');
@@ -313,35 +459,83 @@
             modalOverlay.classList.remove('visible');
         };
 
-        const editSite = (index) => {
-            const site = sites[index];
-            const newName = prompt('새 사이트 이름을 입력하세요:', site.name);
-            if (newName) {
-                sites[index].name = newName;
-                saveSites();
-                renderSites();
-            }
+        const openPdfModal = (pdfUrl) => {
+            pdfViewer.innerHTML = `<iframe src="${pdfUrl}"></iframe>`;
+            pdfModalOverlay.classList.add('visible');
         };
 
-        const deleteSite = (index) => {
-            if (confirm('정말 삭제하시겠습니까?')) {
-                sites.splice(index, 1);
-                saveSites();
-                renderSites();
-                closeModal();
-            }
+        const closePdfModal = () => {
+            pdfModalOverlay.classList.remove('visible');
+            pdfViewer.innerHTML = '';
         };
+
+        const showSaveNotification = () => {
+            saveNotification.classList.add('show');
+            setTimeout(() => {
+                saveNotification.classList.remove('show');
+            }, 2000);
+        };
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const index = editIndexInput.value;
+            const newSite = {
+                name: siteNameInput.value.trim(),
+                link: siteLinkInput.value.trim(),
+                image: siteImageInput.value.trim(),
+                pdfUrl: sitePdfInput.value.trim(),
+                description: siteDescriptionInput.value.trim(),
+                usage: siteUsageInput.value.trim(),
+            };
+
+            if (index === '-1') {
+                sites.push(newSite);
+            } else {
+                sites[index] = newSite;
+            }
+            saveSites();
+            renderSites();
+            form.reset();
+            editIndexInput.value = '-1';
+            showSaveNotification();
+        });
 
         modalClose.addEventListener('click', closeModal);
         modalOverlay.addEventListener('click', (e) => {
             if (e.target === modalOverlay) closeModal();
         });
 
+        pdfModalClose.addEventListener('click', closePdfModal);
+        pdfModalOverlay.addEventListener('click', (e) => {
+            if (e.target === pdfModalOverlay) closePdfModal();
+        });
+
         modalBody.addEventListener('click', (e) => {
             if (e.target.classList.contains('edit-btn')) {
-                editSite(e.target.dataset.index);
+                const index = e.target.dataset.index;
+                const site = sites[index];
+                editIndexInput.value = index;
+                siteNameInput.value = site.name;
+                siteLinkInput.value = site.link;
+                siteImageInput.value = site.image;
+                sitePdfInput.value = site.pdfUrl;
+                siteDescriptionInput.value = site.description;
+                siteUsageInput.value = site.usage;
+                closeModal();
+                document.getElementById('add-site-section').scrollIntoView({ behavior: 'smooth' });
             } else if (e.target.classList.contains('delete-btn')) {
-                deleteSite(e.target.dataset.index);
+                const index = e.target.dataset.index;
+                if (confirm(`'${sites[index].name}'을(를) 정말 삭제하시겠습니까?`)) {
+                    sites.splice(index, 1);
+                    saveSites();
+                    renderSites();
+                    closeModal();
+                }
+            } else if (e.target.classList.contains('pdf-btn')) {
+                const pdfUrl = e.target.dataset.pdfUrl;
+                if (pdfUrl) {
+                    openPdfModal(pdfUrl);
+                }
             }
         });
 
@@ -349,10 +543,8 @@
             animation: 150,
             ghostClass: 'sortable-ghost',
             onEnd: function (evt) {
-                const oldIndex = evt.oldIndex;
-                const newIndex = evt.newIndex;
-                const [movedItem] = sites.splice(oldIndex, 1);
-                sites.splice(newIndex, 0, movedItem);
+                const [movedItem] = sites.splice(evt.oldIndex, 1);
+                sites.splice(evt.newIndex, 0, movedItem);
                 saveSites();
                 renderSites();
             },
