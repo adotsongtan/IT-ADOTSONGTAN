@@ -312,7 +312,6 @@
                 siteElement.classList.add('site-container');
                 siteElement.dataset.id = index;
                 siteElement.innerHTML = `<div class="site-name">${site.name}</div>`;
-                siteElement.addEventListener('click', () => openModal(index));
                 siteListContainer.appendChild(siteElement);
             });
             adjustAllFontSizes();
@@ -368,6 +367,13 @@
             pdfViewer.innerHTML = '';
         };
 
+        siteListContainer.addEventListener('click', (e) => {
+            const container = e.target.closest('.site-container');
+            if (container) {
+                openModal(container.dataset.id);
+            }
+        });
+
         modalClose.addEventListener('click', closeModal);
         modalOverlay.addEventListener('click', (e) => {
             if (e.target === modalOverlay) closeModal();
@@ -390,6 +396,8 @@
         new Sortable(siteListContainer, {
             animation: 150,
             ghostClass: 'sortable-ghost',
+            delay: 200, 
+            delayOnTouchOnly: true,
             onEnd: function (evt) {
                 const [movedItem] = sites.splice(evt.oldIndex, 1);
                 sites.splice(evt.newIndex, 0, movedItem);
